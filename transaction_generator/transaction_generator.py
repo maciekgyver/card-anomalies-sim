@@ -16,8 +16,8 @@ def transaction_generator(cards: List[Card], anomaly_chance: float):
         if (value := round(abs(random.gauss(card.initial_balance / 10000, card.balance / 10000)), 2)) > card.balance:
             raise StopIteration
 
-        latitude = random.gauss(card.user.typical_location.latitude, 1)
-        longitude = random.gauss(card.user.typical_location.longitude, 2)
+        latitude = random.gauss(card.user.typical_location.latitude, 2)
+        longitude = random.gauss(card.user.typical_location.longitude, 3)
         transaction_time = int(card.last_transaction_time + abs(random.gauss(60 * 60 * 24, 60 * 60 * 12)))
 
         if random.random() < anomaly_chance / 100:

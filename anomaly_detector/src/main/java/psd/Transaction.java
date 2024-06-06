@@ -1,23 +1,22 @@
 package psd;
 
-public class Transaction {
-    private String transactionId;
-    private String userId;
-    private Long cardNumber;
-    private Double value;
-    private Long timestamp;
-    private Location location;
-    private Double balance;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
-    public Transaction(String transactionId, String userId, Long cardNumber, Double value, Long timestamp, Location location, Double balance) {
-        this.transactionId = transactionId;
-        this.userId = userId;
-        this.cardNumber = cardNumber;
-        this.value = value;
-        this.timestamp = timestamp;
-        this.location = location;
-        this.balance = balance;
-    }
+public class Transaction {
+    @JsonProperty("transaction_id")
+    private String transactionId;
+    @JsonProperty("user_id")
+    private String userId;
+    @JsonProperty("card_num")
+    private Long cardNumber;
+    @JsonProperty("value")
+    private Double value;
+    @JsonProperty("timestamp")
+    private Long timestamp;
+    @JsonProperty("location")
+    private Location location;
+    @JsonProperty("balance")
+    private Double balance;
 
     public Double getValue() {
         return value;

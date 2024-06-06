@@ -15,6 +15,27 @@ public class Alert {
         this.zScore = zScore;
     }
 
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public Long getCardNumber() {
+        return cardNumber;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+
+    public Double getzScore() {
+        return zScore;
+    }
+
+    @Override
     public String toString() {
         return "Alert{" +
                 "transactionId='" + transactionId + '\'' +

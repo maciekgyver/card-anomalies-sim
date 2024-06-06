@@ -1,13 +1,12 @@
 package psd;
 
-public class Location {
-    private Double latitude;
-    private Double longitude;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
-    public Location(Double latitude, Double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
+public class Location {
+    @JsonProperty("latitude")
+    private Double latitude;
+    @JsonProperty("longitude")
+    private Double longitude;
 
     @Override
     public String toString() {

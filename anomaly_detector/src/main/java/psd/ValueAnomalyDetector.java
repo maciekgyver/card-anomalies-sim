@@ -18,21 +18,28 @@ public class ValueAnomalyDetector extends KeyedProcessFunction<Long, Transaction
     private transient ValueState<Double> varianceSumState;
 
     @Override
-    public void open(Configuration parameters) {
-        ValueStateDescriptor<Long> numFlagDescriptor = new ValueStateDescriptor<>(
-                "numOfTransactions",
-                Types.LONG);
-        numberOfTransactions = getRuntimeContext().getState(numFlagDescriptor);
+    public void open(Configuration parameters) throws Exception {
+//        ValueStateDescriptor<Long> numFlagDescriptor = new ValueStateDescriptor<>(
+//                "numOfTransactions",
+//                Types.LONG);
+//        numberOfTransactions = getRuntimeContext().getState(numFlagDescriptor);
+//
+//        ValueStateDescriptor<Double> meanFlagDescriptor = new ValueStateDescriptor<>(
+//                "mean",
+//                Types.DOUBLE);
+//        meanState = getRuntimeContext().getState(meanFlagDescriptor);
+//
+//        ValueStateDescriptor<Double> varianceSumFlagDescriptor = new ValueStateDescriptor<>(
+//                "varianceSum",
+//                Types.DOUBLE);
+//        varianceSumState = getRuntimeContext().getState(varianceSumFlagDescriptor);
+        ValueStateDescriptor<Long> countDescriptor = new ValueStateDescriptor<>("numberOfTransactions", Long.class);;
+        ValueStateDescriptor<Double> meanDescriptor = new ValueStateDescriptor<>("mean", Double.class);
+        ValueStateDescriptor<Double> stdDevDescriptor = new ValueStateDescriptor<>("varianceSum", Double.class);
 
-        ValueStateDescriptor<Double> meanFlagDescriptor = new ValueStateDescriptor<>(
-                "mean",
-                Types.DOUBLE);
-        meanState = getRuntimeContext().getState(meanFlagDescriptor);
-
-        ValueStateDescriptor<Double> varianceSumFlagDescriptor = new ValueStateDescriptor<>(
-                "varianceSum",
-                Types.DOUBLE);
-        varianceSumState = getRuntimeContext().getState(varianceSumFlagDescriptor);
+        numberOfTransactions = getRuntimeContext().getState(countDescriptor);
+        meanState = getRuntimeContext().getState(meanDescriptor);
+        varianceSumState = getRuntimeContext().getState(stdDevDescriptor);
     }
 
     // Welford's algorithm
@@ -53,6 +60,12 @@ public class ValueAnomalyDetector extends KeyedProcessFunction<Long, Transaction
     }
 
     private double getZScore(double new_value) throws IOException {
+        if (meanState.value() == null) {
+            meanState.update(0.0);
+            numberOfTransactions.update(0L);
+            varianceSumState.update(0.0);
+            return 0;
+        }
         double std = stddev();
         return std > 0 ? (new_value - meanState.value()) / std : 0;
     }

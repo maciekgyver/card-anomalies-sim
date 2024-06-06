@@ -3,12 +3,6 @@ import argparse
 from transaction_simulator import TransactionSimulator
 
 
-# producer = KafkaProducer(
-#     bootstrap_servers=['localhost:9092'],
-#     value_serializer=lambda m: json.dumps(m).encode('utf-8')
-# )
-
-
 def main():
     parser = argparse.ArgumentParser(description="Simulation parameters.")
     parser.add_argument(

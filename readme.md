@@ -1,6 +1,5 @@
 # Wykrywanie anomalii w symulowanych tranzakcjach kartami płatniczymi
-- *Maciej Kowalczyk*
-- *Hubert Leszczyński*
+*Maciej Kowalczyk*
 
 # Sposób uzycia
 1. Uruchomić dockerowe obrazy programów `flink` i `kafka` poleceniem `docker compose up -d`

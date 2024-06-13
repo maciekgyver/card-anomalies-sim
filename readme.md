@@ -1,13 +1,16 @@
 # Wykrywanie anomalii w symulowanych tranzakcjach kartami płatniczymi
-Maciej Kowalczyk
+- *Maciej Kowalczyk*
+- *Hubert Leszczyński*
 
-## Sposób uzycia
+# Sposób uzycia
 1. Uruchomić dockerowe obrazy programów `flink` i `kafka` poleceniem `docker compose up -d`
 2. Skompilować aplikację do detekcji anomalii (z uzyciem `maven`) i wgrać skompilowany job do `flink job manager` dostępnego pod adresem `http://127.0.0.1:8081`
 3. Przejść do katalogu `data_visualization` i uruchomić aplikację do wizualizacji poleceniem `python3 card_visualizer.py`
 4. Przejść do katalogu `transaction_generator` i uruchomić generator poleceniem `python3 main.py [params]`
 
 Zaleca się uzycie `venv`, pliki `requirements.txt` znajdują się w poszczególnych katalogach.
+
+# Moduły
 
 ## Generator tranzakcji
 Generator tranzakcji został napisany w języku `python`. 
@@ -176,10 +179,28 @@ Wszystkie anomalie wysyłane są na topic kafki `TransactionAlerts`.
 
 
 ## Aplikacja do wizualizacji danych
-Aplikacja do wizualizacji danych napisana została w języku `python` z wykorzystaniem biblioteki `dash`. Jest to prosta aplikacja webowa umozliwiająca uzytkownikowi wybór karty, z której dane tranzakcji mają być wyświetlane. Po wyborze karty wyświetlane są:
+Aplikacja do wizualizacji danych napisana została w języku `python` z wykorzystaniem biblioteki `dash`. Jest to prosta aplikacja webowa umozliwiająca uzytkownikowi wybór karty, z której dane tranzakcji mają być wyświetlane. Dane odczytywane są w osobnych wątkach z dwóch topiców kafki - `CreditCardTransactions` i `TransactionAlerts`.Po wyborze karty wyświetlane są:
 - wykres wartości ostatnich tranzakcji
 - mapa lokalizacji tranzakcji
 - wykres częstotliwości tranzakcji
 - lista anomalii wykrytych dla danej karty
 
 Buforowane jest 100 ostatnich wartości.
+
+
+# Przykład działania
+- Generator anomali uruchomiony dla domyślnych parametrów, na konsole drukowane są informacje o wygenerowaniu anomalii
+    ![](<img/Screenshot 2024-06-13 at 15.09.08.png>)
+- Dane wysyłane są na topic kafki `CreditCardTransactions`
+    ![](<img/Screenshot 2024-06-13 at 15.07.01.png>)
+- Dane filtrowane są z wykorzystaniem aplikacji flinkowej
+    ![](<img/Screenshot 2024-06-13 at 15.06.25.png>)
+- Anomalie wysyłane na oddzielny topic `TransactionAlerts`
+    ![](<img/Screenshot 2024-06-13 at 15.07.08.png>)
+- Dane wizualizowane są za pomocą aplikacji webowej. Umozliwia ona wybór karty, z której wyświetlane są dane tranzakcji (liczba w nawiasie jest informacją dla uzytkownika ile tranzakcji zostało juz zarejestrowane dla danej karty). Ponizej wyświetlane są anomalie wykryte dla danej karty
+    ![](<img/Screenshot 2024-06-13 at 14.58.43.png>)
+- Ponadto dynamicznie odświeane są dwa wykresy z wartościami tranzakcji oraz czasem pomiędzy nimi,
+    ![](<img/Screenshot 2024-06-13 at 14.58.22.png>)
+    ![](<img/Screenshot 2024-06-13 at 15.03.30.png>)
+- Oraz mapa z zaznaczonymi lokalizacjami tranzakcji
+    ![](<img/Screenshot 2024-06-13 at 15.01.42.png>)

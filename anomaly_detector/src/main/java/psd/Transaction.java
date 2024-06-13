@@ -41,4 +41,8 @@ public class Transaction {
                 ", balance=" + balance +
                 '}';
     }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
 }

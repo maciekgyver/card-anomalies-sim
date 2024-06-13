@@ -8,23 +8,26 @@ import org.apache.flink.util.Collector;
 
 import java.io.IOException;
 
-public class ValueAnomalyDetector extends KeyedProcessFunction<Long, Transaction, Alert> {
+public class TimeAnomalyDetector extends KeyedProcessFunction<Long, Transaction, Alert> {
 
     private static final long serialVersionUID = 1L;
 
     private transient ValueState<Long> numberOfTransactions;
+    private transient ValueState<Long> lastTransactionTimeState;
     private transient ValueState<Double> meanState;
     private transient ValueState<Double> varianceSumState;
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        ValueStateDescriptor<Long> countDescriptor = new ValueStateDescriptor<>("numberOfTransactions", Long.class);;
+        ValueStateDescriptor<Long> countDescriptor = new ValueStateDescriptor<>("numberOfTransactions", Long.class);
         ValueStateDescriptor<Double> meanDescriptor = new ValueStateDescriptor<>("mean", Double.class);
         ValueStateDescriptor<Double> stdDevDescriptor = new ValueStateDescriptor<>("varianceSum", Double.class);
+        ValueStateDescriptor<Long> lastTransactionTimeDescriptor = new ValueStateDescriptor<>("lastTransactionTime", Long.class);
 
         numberOfTransactions = getRuntimeContext().getState(countDescriptor);
         meanState = getRuntimeContext().getState(meanDescriptor);
         varianceSumState = getRuntimeContext().getState(stdDevDescriptor);
+        lastTransactionTimeState = getRuntimeContext().getState(lastTransactionTimeDescriptor);
     }
 
     // Welford's algorithm
@@ -60,11 +63,16 @@ public class ValueAnomalyDetector extends KeyedProcessFunction<Long, Transaction
             Transaction transaction,
             Context context,
             Collector<Alert> collector) throws Exception {
-
-        double zScore = getZScore(transaction.getValue());
-        if (zScore > 3 || zScore < -3 && numberOfTransactions.value() > 10) {
-            collector.collect(new Alert(transaction.getTransactionId(), transaction.getCardNumber(), "Value Anomaly Detected", transaction.getValue(), zScore));
+        if (lastTransactionTimeState.value() != null) {
+            double zScore = getZScore(transaction.getValue());
+            if (zScore > 3 || zScore < -3 && numberOfTransactions.value() > 10) {
+                collector.collect(new Alert(transaction.getTransactionId(), transaction.getCardNumber(), "Time Anomaly Detected", transaction.getValue(), zScore));
+            }
+            updateStatistics(transaction.getTimestamp() - lastTransactionTimeState.value());
+            lastTransactionTimeState.update(transaction.getTimestamp());
         }
-        updateStatistics(transaction.getValue());
+        else {
+            lastTransactionTimeState.update(transaction.getTimestamp());
+        }
     }
 }

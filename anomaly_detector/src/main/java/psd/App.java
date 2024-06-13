@@ -28,11 +28,17 @@ public class App {
                 .setDeserializer(new TransactionDeserializationSchema())
                 .build();
 
-        DataStream<Alert> alerts = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
+        DataStream<Alert> value_alerts = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
                 .keyBy(Transaction::getCardNumber)
                 .process(new ValueAnomalyDetector());
-//                .process(new LocationAnomalyDetector())
-//                .process(new TimeAnomalyDetector());
+
+        DataStream<Alert> location_alerts = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
+                .keyBy(Transaction::getCardNumber)
+                .process(new LocationAnomalyDetector());
+
+        DataStream<Alert> interval_alerts = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
+                .keyBy(Transaction::getCardNumber)
+                .process(new TimeAnomalyDetector());
 
 
         JsonSerializationSchema<Alert> jsonSchema = new JsonSerializationSchema<>();
@@ -46,7 +52,9 @@ public class App {
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
-        alerts.sinkTo(AlertKafkaSink);
+        value_alerts.sinkTo(AlertKafkaSink);
+        location_alerts.sinkTo(AlertKafkaSink);
+        interval_alerts.sinkTo(AlertKafkaSink);
 
         env.execute();
     }
